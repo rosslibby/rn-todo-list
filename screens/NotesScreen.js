@@ -31,9 +31,7 @@ export default class NotesScreen extends Component {
       borderColor: '#dddddd',
       borderStyle: 'solid',
       borderWidth: .24,
-      boxSizing: 'border-box',
       color: '#666',
-      listStyle: 'none',
       paddingTop: 14,
       paddingBottom: 14,
       paddingLeft: 30,
@@ -52,9 +50,9 @@ export default class NotesScreen extends Component {
           {text: 'This is note C'},
           {text: 'This is note D'}
         ]}
-        renderItem={({item, index}) => <View>
+        renderItem={({item, index}) => <View
+          key={index}>
           <Text
-            key={index}
             style={listItemStyle}>{item.text}</Text>
         </View>}
       />
