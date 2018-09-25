@@ -30,12 +30,11 @@ export default class NotesScreen extends Component {
     const query = new Parse.Query(Note)
     let notesArray = []
     query.select('text', 'completed', 'deleted')
+    query.descending('createdAt')
     query.find().then(results => results.map(result => result.get('text')))
     .then(notes => {
       if (notes !== this.state.notes)
-        this.setState({ notes }, () => {
-          console.log(this.state)
-        })
+        this.setState({ notes })
     })
   }
 
@@ -57,10 +56,10 @@ export default class NotesScreen extends Component {
       shadowColor: 'rgba(0, 0, 0, .2)',
       shadowOffset: {width: 0, height: 0},
       shadowOpacity: .5,
-      shadowRadius: 2,
+      shadowRadius: 1,
       elevation: 0,
-      marginTop: 20,
-      marginBottom: 20,
+      marginTop: 10,
+      marginBottom: 10,
       overflow: 'hidden',
       borderRadius: 4,
       height: '100%'
@@ -73,25 +72,35 @@ export default class NotesScreen extends Component {
       borderStyle: 'solid',
       borderWidth: .24,
       color: '#666',
-      marginTop: 10,
+      marginTop: 6,
       paddingTop: 14,
       paddingBottom: 14,
-      paddingLeft: 30,
-      paddingRight: 30,
+      paddingLeft: 14,
+      paddingRight: 14,
       fontWeight: '100',
-      width: '100%'
+      maxWidth: '94%',
+      minWidth: '94%',
+      marginRight: '3%',
+      marginLeft: '3%'
     }
+
+    const swipeBtns = [{
+      text: 'Delete',
+      backgroundColor: 'red',
+      underlayColor: 'rgba(0, 0, 0, 1, 0.6)',
+      onPress: () => this.deleteNote(rowData)
+    }]
 
     return <View>
       <FlatList
         style={listStyle}
         contentContainerStyle={{ alignItems: 'center' }}
         data={this.state.notes}
-        renderItem={({item, index}) => <View
-          key={index}>
+        renderItem={({item, index}) => <View>
           <Text
             style={listItemStyle}>{item}</Text>
         </View>}
+        keyExtractor={(item, index) => `key_${index}`}
       />
     </View>
   }
