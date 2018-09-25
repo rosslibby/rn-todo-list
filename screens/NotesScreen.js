@@ -1,7 +1,20 @@
 import React, { Component } from 'react'
-import { Button, FlatList, Text, View } from 'react-native'
+import { AsyncStorage, Button, FlatList, Text, View } from 'react-native'
+import Parse from 'parse/react-native'
+
+Parse.setAsyncStorage(AsyncStorage)
+Parse.initialize('rnTodoList', 'i$mU45W%S9WjHvrOi5Htmc*a16')
+Parse.serverURL = 'https://rn-todo-list.herokuapp.com/parse'
 
 export default class NotesScreen extends Component {
+  constructor () {
+    super()
+
+    this.state = {
+      notes: []
+    }
+  }
+
   _completeItem (index) {
     const { completeItem, state } = this.props
     completeItem(index, state)
@@ -10,6 +23,33 @@ export default class NotesScreen extends Component {
   _deleteItem (index) {
     const { deleteItem, state } = this.props
     deleteItem(index, state)
+  }
+
+  _getNotes () {
+    const Note = Parse.Object.extend('Note')
+    const query = new Parse.Query(Note)
+    let notesArray = []
+    query.select('text', 'completed', 'deleted')
+    query.find().then(results => results.map(result => result.get('text')))
+    .then(notes => {
+      if (notes !== this.state.notes)
+        this.setState({ notes }, () => {
+          console.log(this.state)
+        })
+    })
+  }
+
+  componentDidMount () {
+    this.didFocusListener = this.props.navigation.addListener(
+      'didFocus',
+      () => {
+        this._getNotes()
+      }
+    )
+  }
+
+  componentWillUnmount () {
+    this.didFocusListener.remove()
   }
 
   render () {
@@ -22,7 +62,8 @@ export default class NotesScreen extends Component {
       marginTop: 20,
       marginBottom: 20,
       overflow: 'hidden',
-      borderRadius: 4
+      borderRadius: 4,
+      height: '100%'
     }
 
     const listItemStyle = {
@@ -32,6 +73,7 @@ export default class NotesScreen extends Component {
       borderStyle: 'solid',
       borderWidth: .24,
       color: '#666',
+      marginTop: 10,
       paddingTop: 14,
       paddingBottom: 14,
       paddingLeft: 30,
@@ -44,16 +86,11 @@ export default class NotesScreen extends Component {
       <FlatList
         style={listStyle}
         contentContainerStyle={{ alignItems: 'center' }}
-        data={[
-          {text: 'This is note A'},
-          {text: 'This is note B'},
-          {text: 'This is note C'},
-          {text: 'This is note D'}
-        ]}
+        data={this.state.notes}
         renderItem={({item, index}) => <View
           key={index}>
           <Text
-            style={listItemStyle}>{item.text}</Text>
+            style={listItemStyle}>{item}</Text>
         </View>}
       />
     </View>
